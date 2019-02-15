@@ -7,8 +7,9 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value="cms页面管理接口",description = "cms页面管理接口，提供页面的增、删、改、查")
+@Api(value = "cms_page查询接口",description = "进行CmsPage的相关query操作")
 public interface CmsPageControllerApi {
+
     //页面查询
     @ApiOperation("分页查询页面列表")
     @ApiImplicitParams({

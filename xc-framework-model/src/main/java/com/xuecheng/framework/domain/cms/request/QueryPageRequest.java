@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
+ * 接收页面查询CMs_page 所要的相关信息
+ *
  * @author Administrator
  * @version 1.0
  * @create 2018-09-12 14:59
