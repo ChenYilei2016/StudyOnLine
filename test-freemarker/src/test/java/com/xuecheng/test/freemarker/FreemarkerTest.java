@@ -1,23 +1,20 @@
 package com.xuecheng.test.freemarker;
 
 import com.xuecheng.test.freemarker.model.Student;
-import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
-import org.springframework.web.servlet.view.freemarker.FreeMarkerView;
-import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -44,6 +41,7 @@ public class FreemarkerTest {
         Template template = configuration.getTemplate("test1.ftl");
 //        String str = FreeMarkerTemplateUtils.processTemplateIntoString(template, getMap());
 //        Files.copy(new ByteArrayInputStream(str.getBytes()), new File(BASEURL + "demo.html").toPath());
+
         template.process(getMap(),new FileWriter(new File(BASEURL + "demo.html")));
     }
 

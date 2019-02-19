@@ -25,6 +25,7 @@
             <artifactId>lombok</artifactId>
         </dependency>
         <dependency>
+            <!--<okhttp.version>3.9.1</okhttp.version>-->
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
         </dependency>

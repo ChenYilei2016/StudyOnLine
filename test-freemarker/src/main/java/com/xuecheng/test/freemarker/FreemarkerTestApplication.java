@@ -16,6 +16,8 @@ public class FreemarkerTestApplication {
     public static void main(String[] args) {
         SpringApplication.run(FreemarkerTestApplication.class,args);
     }
+
+    //采用okhttp的连接方式
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate(new OkHttp3ClientHttpRequestFactory());

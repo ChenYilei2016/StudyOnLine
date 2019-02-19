@@ -1,24 +1,38 @@
 package com.xuecheng.manage_cms.service;
 
+import com.mongodb.client.gridfs.GridFSBucket;
+import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.xuecheng.framework.domain.cms.CmsPage;
+import com.xuecheng.framework.domain.cms.CmsTemplate;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
+import com.xuecheng.framework.domain.cms.response.CmsCode;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
+import com.xuecheng.framework.exception.ExceptionCast;
+import com.xuecheng.framework.exception.ExceptionCatch;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.manage_cms.dao.CmsPageRepository;
+import com.xuecheng.manage_cms.dao.CmsTemplateRepository;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import org.apache.commons.io.IOUtils;
+import org.bson.types.ObjectId;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * --添加相关注释--
@@ -31,6 +45,17 @@ import java.util.Optional;
 public class PageService {
     @Autowired
     CmsPageRepository cmsPageRepository;
+    @Autowired
+    CmsTemplateRepository cmsTemplateRepository;
+
+    @Autowired
+    RestTemplate restTemplate;
+
+    //文件mongo的操作类
+    @Autowired
+    GridFsTemplate gridFsTemplate;
+    @Autowired
+    GridFSBucket gridFSBucket;
 
     public QueryResponseResult findList(int page,int size, QueryPageRequest queryPageRequest) {
         if(queryPageRequest == null){
@@ -96,6 +121,7 @@ public class PageService {
             one.setPageWebPath(cmsPage.getPageWebPath());
             //更新物理路径
             one.setPagePhysicalPath(cmsPage.getPagePhysicalPath());
+            one.setDataUrl(cmsPage.getDataUrl());
             //提交修改
             cmsPageRepository.save(one);
             return new CmsPageResult(CommonCode.SUCCESS,one);
@@ -104,4 +130,51 @@ public class PageService {
         return new CmsPageResult(CommonCode.FAIL,null);
 
     }
+
+
+    //页面静态化 使用pageId: 5a795ac7dd573c04508f3a56
+    //1. 得到Model 数据
+    //2. 得到template
+    //3. 生成 .html (这里直接返回字符串结果)
+    public String getPageHtml(String pageId){
+        Optional<CmsPage> oCmsPage = cmsPageRepository.findById(pageId);
+        if(!oCmsPage.isPresent()){
+            ExceptionCast.cast(CmsCode.CMS_PAGE_NOT_EXIST);
+        }
+        CmsPage cmsPage = oCmsPage.get();
+        //1. 得到Model 数据
+        String dataUrl = cmsPage.getDataUrl();
+        Map model =new HashMap();
+        model.put("model",restTemplate.getForObject(dataUrl, Map.class));
+        System.out.println("model: "+model);
+        if(null == model.get("model")){
+            ExceptionCast.cast(CmsCode.CMS_GENERATEHTML_DATAISNULL);
+        }
+        //2. 得到template
+        String templateId = cmsPage.getTemplateId();
+        Optional<CmsTemplate> oCmsTemplate = cmsTemplateRepository.findById(templateId);
+        if(!oCmsTemplate.isPresent()){
+            ExceptionCast.cast(CmsCode.CMS_GENERATEHTML_TEMPLATEISNULL);
+        }
+        CmsTemplate cmsTemplate = oCmsTemplate.get();
+        String fileId = cmsTemplate.getTemplateFileId();
+        String template = null;
+        try {
+            GridFSDownloadStream stream = gridFSBucket.openDownloadStream(new ObjectId(fileId));
+            template = IOUtils.toString(stream, "utf-8");
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+        //3. 生成 .html (这里直接返回字符串结果)
+        try {
+            Template templateObject = new Template("template", template, new Configuration(Configuration.getVersion()));
+            return FreeMarkerTemplateUtils.processTemplateIntoString(templateObject,model);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
+
