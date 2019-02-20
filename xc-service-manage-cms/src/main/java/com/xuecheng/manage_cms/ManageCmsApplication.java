@@ -18,8 +18,8 @@ import java.util.Map;
  * @author chenyilei
  * @date 2019/02/14- 21:49
  */
-@SpringBootApplication
 //@EntityScan(basePackages = {"com.xuecheng.framework.domain.cms"}) //扫描实体类
+@SpringBootApplication
 @ComponentScan(basePackages = {"com.xuecheng.api"}) //扫描接口 TODO 查看区别
 @ComponentScan(basePackages = {"com.xuecheng.manage_cms"})//自己包下的
 @ComponentScan(basePackages = {"com.xuecheng.framework"})//common等包的异常捕获器

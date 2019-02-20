@@ -38,6 +38,13 @@
         <elasticsearch.version>6.2.1</elasticsearch.version>
         <guava.version>24.0-jre</guava.version>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
     <!--test-->
     <dependencyManagement>
         <dependencies>
