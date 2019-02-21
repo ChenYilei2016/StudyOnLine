@@ -1,12 +1,6 @@
-package com.xuecheng.manage_cms.rabbit;
+package com.xuecheng.manage_cms.rabbit.test;
 
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 /**
  * --添加相关注释--

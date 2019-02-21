@@ -4,10 +4,12 @@ import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
 import com.xuecheng.framework.model.response.QueryResponseResult;
+import com.xuecheng.framework.model.response.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Api(value = "cms_page查询接口",description = "进行CmsPage的相关query操作")
 public interface CmsPageControllerApi {
@@ -35,5 +37,9 @@ public interface CmsPageControllerApi {
     //删除页面
     @ApiOperation("删除页面")
     public Object delete(String id);
+
+    //进行静态化的发布
+    @ApiOperation("静态化发布")
+    public ResponseResult post( String pageId);
 
 }

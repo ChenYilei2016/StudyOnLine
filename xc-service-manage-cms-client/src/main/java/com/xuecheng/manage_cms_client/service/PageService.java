@@ -49,12 +49,21 @@ public class PageService {
         GridFSDownloadStream stream = gridFSBucket.openDownloadStream(new ObjectId(htmlFileId));
         String localPath = cmsSite.getSitePhysicalPath()+cmsPage.getPagePhysicalPath()+cmsPage.getPageName();
 
+        FileOutputStream fileOutputStream =null;
         try {
-            IOUtils.copy(stream,new FileOutputStream(localPath));
+            fileOutputStream = new FileOutputStream(localPath);
+            IOUtils.copy(stream,fileOutputStream);
         } catch (IOException e) {
             log.error(" IOUtils.copy(stream,new FileOutputStream(localPath));");
             e.printStackTrace();
         }finally {
+            if(null != fileOutputStream){
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             stream.close();
         }
     }

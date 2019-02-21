@@ -11,15 +11,20 @@ import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.exception.ExceptionCatch;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
+import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.manage_cms.dao.CmsPageRepository;
 import com.xuecheng.manage_cms.dao.CmsTemplateRepository;
+import com.xuecheng.manage_cms.rabbit.really.RabbitMqProperties;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -42,6 +47,7 @@ import java.util.*;
  */
 @Service
 @Transactional
+@EnableConfigurationProperties(RabbitProperties.class)
 public class PageService {
     @Autowired
     CmsPageRepository cmsPageRepository;
@@ -56,7 +62,14 @@ public class PageService {
     GridFsTemplate gridFsTemplate;
     @Autowired
     GridFSBucket gridFSBucket;
+    @Autowired
+    RabbitTemplate rabbitTemplate;
+    @Autowired
+    RabbitMqProperties rabbitMqProperties;
 
+    /*
+        页面显示cmspage列表
+     */
     public QueryResponseResult findList(int page,int size, QueryPageRequest queryPageRequest) {
         if(queryPageRequest == null){
             queryPageRequest = new QueryPageRequest();
@@ -176,5 +189,31 @@ public class PageService {
         return null;
     }
 
+    // 执行 页面静态化的按钮操作
+    //使用pageId: 5a795ac7dd573c04508f3a56
+    //1. 生成html 存入gridfs 获得id
+    //2. 更新cmsPage
+    //3. 发送mq
+    public ResponseResult get(String pageId) {
+        CmsPage cmsPage = cmsPageRepository.findById(pageId).get();
+        try {
+            //上传文件
+            String pageHtml = getPageHtml(pageId);
+            gridFSBucket.delete(new ObjectId(cmsPage.getHtmlFileId()));
+            ObjectId objectId = gridFSBucket.uploadFromStream(cmsPage.getPageName(), IOUtils.toInputStream(pageHtml, "utf-8"));
+            cmsPage.setHtmlFileId(objectId.toHexString());
+
+            //更新cmspage
+            cmsPageRepository.save(cmsPage);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //发送mq
+        Map map = new HashMap();
+        map.put("pageId",pageId);
+        rabbitTemplate.convertAndSend(rabbitMqProperties.getExchangeName(),cmsPage.getSiteId(),map); //TODO 是否需要转JSON
+        return new ResponseResult(CommonCode.SUCCESS);
+    }
 }
 

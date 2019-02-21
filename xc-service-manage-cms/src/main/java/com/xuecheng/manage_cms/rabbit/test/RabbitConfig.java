@@ -1,4 +1,4 @@
-package com.xuecheng.manage_cms.rabbit;
+package com.xuecheng.manage_cms.rabbit.test;
 
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Autowired;

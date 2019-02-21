@@ -8,6 +8,7 @@ import com.xuecheng.framework.exception.CustomException;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
+import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.manage_cms.dao.CmsPageRepository;
 import com.xuecheng.manage_cms.service.PageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,5 +73,14 @@ public class CmsPageController implements CmsPageControllerApi {
         ExceptionCast.cast(CommonCode.FAIL);
         return 11;
 
+    }
+    //使用pageId: 5a795ac7dd573c04508f3a56
+    //1. 生成html 存入gridfs 获得id
+    //2. 更新cmsPage
+    //3. 发送mq
+    @Override
+    @PostMapping("/postPage/{pageId}")
+    public ResponseResult post(@PathVariable("pageId") String pageId) {
+        return pageService.get(pageId);
     }
 }

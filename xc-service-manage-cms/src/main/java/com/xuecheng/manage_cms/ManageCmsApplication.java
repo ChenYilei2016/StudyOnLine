@@ -1,6 +1,7 @@
 package com.xuecheng.manage_cms;
 
 import com.google.common.collect.ImmutableMap;
+import org.bson.types.ObjectId;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -25,6 +26,7 @@ import java.util.Map;
 @ComponentScan(basePackages = {"com.xuecheng.framework"})//common等包的异常捕获器
 public class ManageCmsApplication {
     public static void main(String[] args) {
+        //
         SpringApplication.run(ManageCmsApplication.class,args);
     }
 
