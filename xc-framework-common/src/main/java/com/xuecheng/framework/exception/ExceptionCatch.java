@@ -28,8 +28,8 @@ public class ExceptionCatch {
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
     public ResponseResult allCatch(Exception e){
-        log.error("catch exception:{}",e.getMessage());
-
+        e.printStackTrace();
+        System.err.println(e.getMessage());
         //可采用map收集
         if(e instanceof HttpMessageNotReadableException){
             return new ResponseResult(CommonCode.INVALID_PARAM);

@@ -13,6 +13,7 @@ import java.util.List;
 @ToString
 public class CategoryNode extends Category {
 
+    String value;
     List<CategoryNode> children;
 
 }

@@ -1,5 +1,6 @@
 package com.xuecheng.manage_cms.service;
 
+import com.mongodb.MongoClient;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.xuecheng.framework.domain.cms.CmsPage;
@@ -19,6 +20,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
@@ -194,7 +196,7 @@ public class PageService {
     //1. 生成html 存入gridfs 获得id
     //2. 更新cmsPage
     //3. 发送mq
-    public ResponseResult get(String pageId) {
+    public ResponseResult toStatic(String pageId) {
         CmsPage cmsPage = cmsPageRepository.findById(pageId).get();
         try {
             //上传文件
