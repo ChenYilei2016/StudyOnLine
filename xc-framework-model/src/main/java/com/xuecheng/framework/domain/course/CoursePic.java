@@ -1,6 +1,8 @@
 package com.xuecheng.framework.domain.course;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -15,6 +17,8 @@ import java.io.Serializable;
 @Entity
 @Table(name="course_pic")
 @GenericGenerator(name = "jpa-assigned", strategy = "assigned")
+@NoArgsConstructor
+@AllArgsConstructor
 public class CoursePic implements Serializable {
     private static final long serialVersionUID = -916357110051689486L;
 

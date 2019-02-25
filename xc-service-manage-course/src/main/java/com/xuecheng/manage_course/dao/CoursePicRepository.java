@@ -9,5 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @author chenyilei
  * @date 2019/02/24- 9:07
  */
-public interface PicRepository extends JpaRepository<CoursePic,String> {
+public interface CoursePicRepository extends JpaRepository<CoursePic,String> {
+
+    long deleteByCourseid(String courseId);
 }

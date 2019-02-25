@@ -6,6 +6,7 @@ import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
 import com.xuecheng.framework.domain.system.SysDictionary;
 import com.xuecheng.manage_course.mongoDao.SysRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,8 @@ import java.util.Optional;
  * @author Administrator
  * @version 1.0
  **/
-@SpringBootTest
-@RunWith(SpringRunner.class)
+//@SpringBootTest
+//@RunWith(SpringRunner.class)
 public class TestDao {
     @Autowired
     CourseBaseRepository courseBaseRepository;
@@ -53,6 +54,10 @@ public class TestDao {
     }
 
     public static void main(String[] args) {
-        System.out.println("200001".substring(4));
+        String imgPath = "group1/M00/00/00/rBsACFxyNqKAVz8EAAfvaiiDjBU796.bmp";
+        String group = StringUtils.substringBefore(imgPath, "/");
+        String path = StringUtils.substringBetween(imgPath, "/", ".");
+        String after = StringUtils.substringAfter(imgPath, ".");
+        System.out.println( after);
     }
 }
