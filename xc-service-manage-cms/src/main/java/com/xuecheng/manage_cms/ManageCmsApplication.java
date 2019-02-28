@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
@@ -24,6 +25,7 @@ import java.util.Map;
 @ComponentScan(basePackages = {"com.xuecheng.api"}) //扫描接口 TODO 查看区别
 @ComponentScan(basePackages = {"com.xuecheng.manage_cms"})//自己包下的
 @ComponentScan(basePackages = {"com.xuecheng.framework"})//common等包的异常捕获器
+@EnableEurekaClient
 public class ManageCmsApplication {
     public static void main(String[] args) {
         //

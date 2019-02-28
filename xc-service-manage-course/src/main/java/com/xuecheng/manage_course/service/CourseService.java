@@ -1,19 +1,24 @@
 package com.xuecheng.manage_course.service;
 
 import com.github.pagehelper.PageHelper;
+import com.xuecheng.framework.domain.cms.CmsPage;
+import com.xuecheng.framework.domain.cms.response.CmsPageResult;
 import com.xuecheng.framework.domain.course.CourseBase;
+import com.xuecheng.framework.domain.course.CourseMarket;
 import com.xuecheng.framework.domain.course.CoursePic;
 import com.xuecheng.framework.domain.course.Teachplan;
 import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.domain.course.ext.CourseInfo;
+import com.xuecheng.framework.domain.course.ext.CourseView;
+import com.xuecheng.framework.domain.course.ext.TeachplanNode;
 import com.xuecheng.framework.domain.course.request.CourseListRequest;
+import com.xuecheng.framework.domain.course.response.CoursePublishResult;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.ResponseResult;
-import com.xuecheng.manage_course.dao.CourseBaseRepository;
-import com.xuecheng.manage_course.dao.CourseMapper;
-import com.xuecheng.manage_course.dao.CoursePicRepository;
-import com.xuecheng.manage_course.dao.TeachplanRepository;
+import com.xuecheng.manage_course.client.CmsPageClient;
+import com.xuecheng.manage_course.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +42,13 @@ public class CourseService {
     TeachplanRepository teachplanRepository;
     @Autowired
     CoursePicRepository coursePicRepository;
+    @Autowired
+    CourseMarketRepository courseMarketRepository;
+    @Autowired
+    TeachplanMapper teachplanMapper;
+
+    @Autowired
+    CmsPageClient cmsPageClient;
 
 //    id:'4028e581617f945f01617f9dabc40000',
 //    name:'bootstrap',
@@ -99,5 +111,61 @@ public class CourseService {
             return new ResponseResult(CommonCode.SUCCESS);
         }
         return new ResponseResult(CommonCode.FAIL);
+    }
+
+    public CourseView getCourseView(String courseId) {
+        CourseView courseView = new CourseView();
+        CourseBase courseBase = courseBaseRepository.findById(courseId).get();
+        courseView.setCourseBase(courseBase);
+
+        CourseMarket courseMarket = courseMarketRepository.findById(courseId).get();
+        courseView.setCourseMarket(courseMarket);
+
+        TeachplanNode teachplanNode = teachplanMapper.selectList(courseId);
+        courseView.setTeachplanNode(teachplanNode);
+
+        CoursePic coursePic = coursePicRepository.findById(courseId).get();
+        courseView.setCoursePic(coursePic);
+        return courseView;
+    }
+
+    @Value("${course-publish.dataUrlPre}")
+    private String publish_dataUrlPre;
+    @Value("${course-publish.pagePhysicalPath}")
+    private String publish_page_physicalpath;
+    @Value("${course-publish.pageWebPath}")
+    private String publish_page_webpath;
+    @Value("${course-publish.siteId}")
+    private String publish_siteId;
+    @Value("${course-publish.templateId}")
+    private String publish_templateId;
+    @Value("${course-publish.previewUrl}")
+    private String previewUrl;
+
+    public CoursePublishResult preview(String courseId) {
+        //构造一个这个课程的 cmsPage,保存获得pageId
+        CourseBase courseBase = courseBaseRepository.findById(courseId).get();
+        //发布课程预览页面
+        CmsPage cmsPage = new CmsPage();
+        //站点
+        cmsPage.setSiteId(publish_siteId);//课程预览站点
+        //模板
+        cmsPage.setTemplateId(publish_templateId);
+        //页面名称
+        cmsPage.setPageName(courseId+".html");
+        //页面别名
+        cmsPage.setPageAliase(courseBase.getName());
+        //页面访问路径
+        cmsPage.setPageWebPath(publish_page_webpath);
+        //页面存储路径
+        cmsPage.setPagePhysicalPath(publish_page_physicalpath);
+        //数据url
+        cmsPage.setDataUrl(publish_dataUrlPre+courseId);
+
+        //调用远程服务保存cmspage
+        CmsPageResult save = cmsPageClient.save(cmsPage);
+        String pageId = save.getCmsPage().getPageId();
+        //使用pageId返回预览页面
+        return new CoursePublishResult(previewUrl+pageId,CommonCode.SUCCESS);
     }
 }

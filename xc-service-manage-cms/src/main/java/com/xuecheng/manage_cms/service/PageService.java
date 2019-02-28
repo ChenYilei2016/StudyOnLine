@@ -160,7 +160,9 @@ public class PageService {
         //1. 得到Model 数据
         String dataUrl = cmsPage.getDataUrl();
         Map model =new HashMap();
-        model.put("model",restTemplate.getForObject(dataUrl, Map.class));
+        Map forObject = restTemplate.getForObject(dataUrl, Map.class);
+        model.put("model",forObject);
+        model.putAll(forObject);
         System.out.println("model: "+model);
         if(null == model.get("model")){
             ExceptionCast.cast(CmsCode.CMS_GENERATEHTML_DATAISNULL);
@@ -216,6 +218,14 @@ public class PageService {
         map.put("pageId",pageId);
         rabbitTemplate.convertAndSend(rabbitMqProperties.getExchangeName(),cmsPage.getSiteId(),map); //TODO 是否需要转JSON
         return new ResponseResult(CommonCode.SUCCESS);
+    }
+
+    public CmsPageResult save(CmsPage cmsPage) {
+        CmsPage obj = cmsPageRepository.findBySiteIdAndPageNameAndPageWebPath(cmsPage.getSiteId(), cmsPage.getPageName(), cmsPage.getPageWebPath());
+        if(obj != null){
+            return this.update(obj.getPageId(),cmsPage);
+        }
+        return this.add(cmsPage);
     }
 }
 

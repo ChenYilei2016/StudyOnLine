@@ -42,4 +42,7 @@ public interface CmsPageControllerApi {
     @ApiOperation("静态化发布")
     public ResponseResult post( String pageId);
 
+    @ApiOperation("更新页面")
+    public CmsPageResult save(CmsPage cmsPage);
+
 }
