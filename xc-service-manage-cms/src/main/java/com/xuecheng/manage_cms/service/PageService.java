@@ -4,7 +4,9 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.xuecheng.framework.domain.cms.CmsPage;
+import com.xuecheng.framework.domain.cms.CmsSite;
 import com.xuecheng.framework.domain.cms.CmsTemplate;
+import com.xuecheng.framework.domain.cms.ext.CmsPostPageResult;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
 import com.xuecheng.framework.domain.cms.response.CmsCode;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
@@ -13,7 +15,9 @@ import com.xuecheng.framework.exception.ExceptionCatch;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.framework.model.response.ResponseResult;
+import com.xuecheng.framework.model.response.ResultCode;
 import com.xuecheng.manage_cms.dao.CmsPageRepository;
+import com.xuecheng.manage_cms.dao.CmsSiteRepository;
 import com.xuecheng.manage_cms.dao.CmsTemplateRepository;
 import com.xuecheng.manage_cms.rabbit.really.RabbitMqProperties;
 import freemarker.template.Configuration;
@@ -68,6 +72,8 @@ public class PageService {
     RabbitTemplate rabbitTemplate;
     @Autowired
     RabbitMqProperties rabbitMqProperties;
+    @Autowired
+    CmsSiteRepository cmsSiteRepository;
 
     /*
         页面显示cmspage列表
@@ -203,7 +209,9 @@ public class PageService {
         try {
             //上传文件
             String pageHtml = getPageHtml(pageId);
-            gridFSBucket.delete(new ObjectId(cmsPage.getHtmlFileId()));
+            try {
+                gridFSBucket.delete(new ObjectId(cmsPage.getHtmlFileId()));
+            }catch (Exception e){}
             ObjectId objectId = gridFSBucket.uploadFromStream(cmsPage.getPageName(), IOUtils.toInputStream(pageHtml, "utf-8"));
             cmsPage.setHtmlFileId(objectId.toHexString());
 
@@ -226,6 +234,26 @@ public class PageService {
             return this.update(obj.getPageId(),cmsPage);
         }
         return this.add(cmsPage);
+    }
+
+    public CmsPostPageResult postPageQuick(CmsPage cmsPage) {
+        //保存数据
+        CmsPageResult saveResult = this.save(cmsPage);
+        if(!saveResult.isSuccess()){
+            ExceptionCast.cast(CmsCode.CMS_PAGE_NOT_EXIST);
+        }
+        //静态化
+        CmsPage cmsPageResult = saveResult.getCmsPage();
+        ResponseResult responseResult = this.toStatic(cmsPageResult.getPageId());
+        if(!responseResult.isSuccess()){
+            ExceptionCast.cast(CommonCode.FAIL);
+        }
+        //得到最终页面的访问地址
+        String siteId = cmsPageResult.getSiteId();
+        CmsSite cmsSite = cmsSiteRepository.findById(siteId).get();
+        String pageUrl = cmsSite.getSiteDomain()+cmsSite.getSiteWebPath()+cmsPageResult.getPageWebPath()+cmsPageResult.getPageName();
+
+        return new CmsPostPageResult(CommonCode.SUCCESS,pageUrl);
     }
 }
 

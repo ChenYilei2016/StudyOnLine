@@ -31,7 +31,9 @@ public class CoursePub implements Serializable {
     private String teachmode;
     private String description;
     private String pic;//图片
+
     private Date timestamp;//时间戳
+
     private String charge;
     private String valid;
     private String qq;

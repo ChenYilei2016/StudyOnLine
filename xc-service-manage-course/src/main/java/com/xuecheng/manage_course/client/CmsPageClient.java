@@ -3,6 +3,7 @@ package com.xuecheng.manage_course.client;
 import com.xuecheng.api.cms.CmsPageControllerApi;
 import com.xuecheng.framework.client.XcServiceList;
 import com.xuecheng.framework.domain.cms.CmsPage;
+import com.xuecheng.framework.domain.cms.ext.CmsPostPageResult;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,5 +20,10 @@ public interface CmsPageClient{
     //保存页面
     @PostMapping("/cms/page/save")
     public CmsPageResult save(@RequestBody CmsPage cmsPage);
+
+    //一键发布 存入cmsPage 并且进行静态化
+    @PostMapping("/cms/page/postPageQuick")
+    public CmsPostPageResult postPageQuick(@RequestBody CmsPage cmsPage);
+
 
 }

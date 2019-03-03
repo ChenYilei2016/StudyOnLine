@@ -1,12 +1,12 @@
 package com.xuecheng.manage_course.service;
 
+import com.alibaba.druid.support.json.JSONUtils;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.xuecheng.framework.domain.cms.CmsPage;
+import com.xuecheng.framework.domain.cms.ext.CmsPostPageResult;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
-import com.xuecheng.framework.domain.course.CourseBase;
-import com.xuecheng.framework.domain.course.CourseMarket;
-import com.xuecheng.framework.domain.course.CoursePic;
-import com.xuecheng.framework.domain.course.Teachplan;
+import com.xuecheng.framework.domain.course.*;
 import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.domain.course.ext.CourseInfo;
 import com.xuecheng.framework.domain.course.ext.CourseView;
@@ -17,11 +17,15 @@ import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.manage_course.client.CmsPageClient;
 import com.xuecheng.manage_course.dao.*;
+import org.apache.commons.lang.time.DateUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +50,8 @@ public class CourseService {
     CourseMarketRepository courseMarketRepository;
     @Autowired
     TeachplanMapper teachplanMapper;
-
+    @Autowired
+    CoursePubRepository coursePubRepository;
     @Autowired
     CmsPageClient cmsPageClient;
 
@@ -168,4 +173,65 @@ public class CourseService {
         //使用pageId返回预览页面
         return new CoursePublishResult(previewUrl+pageId,CommonCode.SUCCESS);
     }
+
+    public CoursePublishResult publish(String courseId) {
+        //构造一个这个课程的 cmsPage,保存获得pageId
+        CourseBase courseBase = courseBaseRepository.findById(courseId).get();
+        //发布课程预览页面
+        CmsPage cmsPage = new CmsPage();
+        //站点
+        cmsPage.setSiteId(publish_siteId);//课程预览站点
+        //模板
+        cmsPage.setTemplateId(publish_templateId);
+        //页面名称
+        cmsPage.setPageName(courseId+".html");
+        //页面别名
+        cmsPage.setPageAliase(courseBase.getName());
+        //页面访问路径
+        cmsPage.setPageWebPath(publish_page_webpath);
+        //页面存储路径
+        cmsPage.setPagePhysicalPath(publish_page_physicalpath);
+        //数据url
+        cmsPage.setDataUrl(publish_dataUrlPre+courseId);
+
+        //远程进行保存cmsPage ,并静态化
+        CmsPostPageResult cmsPostPageResult = cmsPageClient.postPageQuick(cmsPage);
+        
+        //更新课程的状态,已经发布
+        courseBase.setStatus("202002");
+        courseBaseRepository.save(courseBase);
+
+        //组合一个pub对象进入数据库 利于logstash爬取数据
+        CoursePub coursePub = createCoursePub(courseId,courseBase);
+        coursePubRepository.save(coursePub);
+
+        return new CoursePublishResult(cmsPostPageResult.getPageUrl(),CommonCode.SUCCESS);
+    }
+
+    private CoursePub createCoursePub(String courseId, CourseBase courseBase) {
+        CoursePub coursePub = new CoursePub();
+        BeanUtils.copyProperties(courseBase,coursePub);
+
+        //查询课程营销
+        Optional<CourseMarket> courseMarket = courseMarketRepository.findById(courseId);
+        if(courseMarket.isPresent()){
+            BeanUtils.copyProperties(courseMarket.get(),coursePub);
+        }
+        //查询课程图片
+        Optional<CoursePic> picOptional = coursePicRepository.findById(courseId);
+        if(picOptional.isPresent()){
+            CoursePic coursePic = picOptional.get();
+            BeanUtils.copyProperties(coursePic, coursePub);
+        }
+        //设置节点
+        coursePub.setTeachplan(JSONObject.toJSONString(teachplanMapper.selectList(courseId)));
+        //给logstash使用
+        coursePub.setTimestamp(new Date());
+        //推出时间
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+        coursePub.setPubTime(simpleDateFormat.format(new Date()));
+
+        return coursePub;
+    }
+
 }

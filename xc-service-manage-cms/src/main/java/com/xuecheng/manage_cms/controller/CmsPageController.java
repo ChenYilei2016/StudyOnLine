@@ -2,6 +2,7 @@ package com.xuecheng.manage_cms.controller;
 
 import com.xuecheng.api.cms.CmsPageControllerApi;
 import com.xuecheng.framework.domain.cms.CmsPage;
+import com.xuecheng.framework.domain.cms.ext.CmsPostPageResult;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
 import com.xuecheng.framework.exception.CustomException;
@@ -89,4 +90,13 @@ public class CmsPageController implements CmsPageControllerApi {
     public CmsPageResult save(@RequestBody CmsPage cmsPage) {
         return pageService.save(cmsPage);
     }
+
+    //一键发布 存入cmsPage 并且进行静态化
+    @Override
+    @PostMapping("/postPageQuick")
+    public CmsPostPageResult postPageQuick(@RequestBody CmsPage cmsPage) {
+        return pageService.postPageQuick(cmsPage);
+    }
+
+
 }

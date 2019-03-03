@@ -12,6 +12,7 @@ import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.framework.model.response.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -51,4 +52,6 @@ public interface CourseControllerApi {
     @ApiOperation("获得预览课程的url,必须先创建或更新cmsPage")
     public CoursePublishResult preview(String courseId);
 
+    @ApiOperation("通过课程id一键发布")
+    public CoursePublishResult publish(@PathVariable String id);
 }
