@@ -33,8 +33,6 @@ public class CookieUtil {
 
     /**
      * 根据cookie名称读取cookie
-     * @param request
-     * @param cookieName1,cookieName2
      * @return map<cookieName,cookieValue>
      */
 

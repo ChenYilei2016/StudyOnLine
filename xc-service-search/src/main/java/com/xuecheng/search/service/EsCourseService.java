@@ -1,26 +1,24 @@
 package com.xuecheng.search.service;
 
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ArrayUtil;
 import com.xuecheng.framework.domain.course.CoursePub;
 import com.xuecheng.framework.domain.search.CourseSearchParam;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +68,12 @@ public class EsCourseService {
         if(StringUtils.isNotBlank(courseSearchParam.getGrade())){
             sbb.filter(QueryBuilders.matchQuery("grade",courseSearchParam.getGrade()));
         }
+        //高亮设置
+        HighlightBuilder hb= new HighlightBuilder();
+        hb = hb.field("name");
+        hb.preTags("<tag>"); hb.postTags("</tag>");
+        sb.highlighter(hb);
+
         //查询整理数据
         SearchResponse search = client.search(searchRequest);
         List<CoursePub> coursePubList = new ArrayList<>();
@@ -77,8 +81,13 @@ public class EsCourseService {
 //            hit.getHighlightFields();
             Map<String, Object> sourceAsMap = hit.getSourceAsMap();
             CoursePub coursePub = new CoursePub();
-            //名字
-            coursePub.setName((String) sourceAsMap.get("name"));
+            //高亮名字
+            HighlightField name = hit.getHighlightFields().get("name");
+            StringBuffer stringBuffer = new StringBuffer();
+            for (Text fragment : name.getFragments()) {
+                stringBuffer.append(fragment.string());
+            }
+            coursePub.setName(stringBuffer.toString());
             //图片
             String pic = (String) sourceAsMap.get("pic");
             coursePub.setPic(pic);
@@ -87,7 +96,8 @@ public class EsCourseService {
                 Float price =  Float.parseFloat(String.valueOf((Double) sourceAsMap.get("price"))); coursePub.setPrice(price); }
             if(null != sourceAsMap.get("price_old")){
                 Float price_old = Float.parseFloat(String.valueOf((Double) sourceAsMap.get("price_old")));  coursePub.setPrice_old(price_old);}
-            coursePubList.add(coursePub);
+            if(coursePub.getName() != null)
+                coursePubList.add(coursePub);
         }
         return new QueryResponseResult<CoursePub>(CommonCode.SUCCESS,coursePubList,search.getHits().totalHits);
     }
