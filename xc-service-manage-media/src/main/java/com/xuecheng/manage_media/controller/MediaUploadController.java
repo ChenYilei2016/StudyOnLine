@@ -3,7 +3,7 @@ package com.xuecheng.manage_media.controller;
 import com.xuecheng.api.media.MediaUploadControllerApi;
 import com.xuecheng.framework.domain.media.response.CheckChunkResult;
 import com.xuecheng.framework.model.response.ResponseResult;
-import com.xuecheng.manage_media.config.MediaUploadService;
+import com.xuecheng.manage_media.service.MediaUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

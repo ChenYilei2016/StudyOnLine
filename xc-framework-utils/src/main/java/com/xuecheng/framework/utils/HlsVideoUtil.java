@@ -62,9 +62,7 @@ public class HlsVideoUtil extends  VideoUtil {
         commend.add("-hls_list_size");
         commend.add("0");
         commend.add("-hls_segment_filename");
-//        commend.add("D:/BaiduNetdiskDownload/Movies/test1/test1_%05d.ts");
         commend.add(m3u8folder_path  + m3u8_name.substring(0,m3u8_name.lastIndexOf(".")) + "_%05d.ts");
-//        commend.add("D:/BaiduNetdiskDownload/Movies/test1/test1.m3u8");
         commend.add(m3u8folder_path  + m3u8_name );
         String outstring = null;
         try {
@@ -73,7 +71,7 @@ public class HlsVideoUtil extends  VideoUtil {
             //将标准输入流和错误输入流合并，通过标准输入流程读取信息
             builder.redirectErrorStream(true);
             Process p = builder.start();
-            outstring = waitFor(p);
+            outstring = ExecProcessUtil.waitFor(p);
 
         } catch (Exception ex) {
 

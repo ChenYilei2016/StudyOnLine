@@ -1,5 +1,6 @@
-package com.xuecheng.manage_media.config;
+package com.xuecheng.manage_media.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.xuecheng.framework.domain.media.MediaFile;
 import com.xuecheng.framework.domain.media.response.CheckChunkResult;
 import com.xuecheng.framework.domain.media.response.MediaCode;
@@ -9,10 +10,12 @@ import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.framework.utils.MD5Util;
 import com.xuecheng.framework.utils.PathUtil;
 import com.xuecheng.framework.utils.StreamUtils;
+import com.xuecheng.manage_media.config.RabbitMQConfig;
 import com.xuecheng.manage_media.dao.MediaFileRepository;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -39,6 +44,12 @@ public class MediaUploadService {
 
     @Value("${xc-service-manage-media.upload-location}")
     private String uploadPath ;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    RabbitMQConfig rabbitMQConfig;
 
     /**
      *  进行文件的检查,是不是已经存在?
@@ -145,7 +156,7 @@ public class MediaUploadService {
         mediaFile.setFileOriginalName(fileName);
         mediaFile.setFileName(fileMd5 + "." +fileExt);
         //文件路径保存相对路径
-        String filePath1 = fileMd5.substring(0,1) + "/" + fileMd5.substring(1,2) + "/" + fileMd5 + "/" + fileMd5 + "." +fileExt;
+        String filePath1 = fileMd5.substring(0,1) + "/" + fileMd5.substring(1,2) + "/" + fileMd5 + "/";
         mediaFile.setFilePath(filePath1);
         mediaFile.setFileSize(fileSize);
         mediaFile.setUploadTime(new Date());
@@ -155,6 +166,15 @@ public class MediaUploadService {
         mediaFile.setFileStatus("301002");
         mediaFileRepository.save(mediaFile);
 
+        //发送处理文件
+        Map map = new HashMap();
+        map.put("mediaId",mediaFile.getFileId());
+        try {
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EX_MEDIA_PROCESSTASK,rabbitMQConfig.routingkey_media_video, JSONObject.toJSONString(map));
+        }catch (Exception e){
+            e.printStackTrace();
+            ExceptionCast.cast(CommonCode.FAIL);
+        }
         return new ResponseResult(CommonCode.SUCCESS);
     }
 }
