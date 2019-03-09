@@ -9,7 +9,7 @@ spring:
       database: xc_cms
   freemarker:
     settings:
-      template_update_delay: 0
+      template_update_delay:
   rabbitmq:
     host: 132.232.117.84
     username: guest

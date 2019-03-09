@@ -3,6 +3,7 @@ package com.xuecheng.api.course;
 import com.xuecheng.framework.domain.course.CourseBase;
 import com.xuecheng.framework.domain.course.CoursePic;
 import com.xuecheng.framework.domain.course.Teachplan;
+import com.xuecheng.framework.domain.course.TeachplanMedia;
 import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.domain.course.ext.CourseView;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
@@ -54,4 +55,7 @@ public interface CourseControllerApi {
 
     @ApiOperation("通过课程id一键发布")
     public CoursePublishResult publish(@PathVariable String id);
+
+    @ApiOperation("课程计划结合media")
+    public ResponseResult savemedia(@RequestBody TeachplanMedia teachplanMedia);
 }
