@@ -4,7 +4,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- *
+ *       <dependency>
+ *             <groupId>org.springframework.security</groupId>
+ *             <artifactId>spring-security-crypto</artifactId>
+ *             <version>4.2.3.RELEASE</version>
+ *       </dependency>
  */
 public class BCryptUtil {
     public static String encode(String password){

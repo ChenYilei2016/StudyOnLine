@@ -18,7 +18,10 @@ import com.xuecheng.manage_course.service.CourseService;
 import com.xuecheng.manage_course.service.TeachplanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.Cookie;
 import java.util.List;
 
 /**
@@ -83,6 +86,10 @@ public class CourseController implements CourseControllerApi {
     @Override
     @GetMapping("/coursepic/list/{courseId}")
     public CoursePic queryCoursePic(@PathVariable("courseId") String courseId) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        Cookie cookie = new Cookie("123", "456");
+        cookie.setMaxAge(100);
+        attributes.getResponse().addCookie(cookie);
         return courseService.queryCoursePic(courseId);
     }
 

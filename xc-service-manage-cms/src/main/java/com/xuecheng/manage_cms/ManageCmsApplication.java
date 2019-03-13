@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.ServletContext;
 import java.util.Map;
 
 /**

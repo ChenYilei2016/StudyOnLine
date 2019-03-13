@@ -41,3 +41,4 @@ eureka:
 #    lease-expiration-duration-in-seconds: 15
 #    instance-id: ${eureka.instance.ip-address}-${spring.application.name}:${server.port}
 #    ip-address: 127.0.0.1
+

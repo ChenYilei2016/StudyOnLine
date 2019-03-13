@@ -1,11 +1,14 @@
 package com.xuecheng.auth.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.xuecheng.auth.elseObject.ApplyTokenErrorProcess;
 import com.xuecheng.framework.client.XcServiceList;
 import com.xuecheng.framework.domain.ucenter.ext.AuthToken;
+import com.xuecheng.framework.domain.ucenter.ext.UserToken;
 import com.xuecheng.framework.domain.ucenter.response.AuthCode;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.CommonCode;
+import com.xuecheng.framework.utils.CookieUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
@@ -15,15 +18,19 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.annotation.Resources;
+import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
@@ -69,7 +76,7 @@ public class AuthService {
         String authUrl = uri+ "/auth/oauth/token";
         //定义header
         LinkedMultiValueMap<String, String> header = new LinkedMultiValueMap<>();
-        String httpBasic = getHttpBasic(clientId, clientSecret);
+        String httpBasic = getHttpBasic(clientId,clientSecret);
         header.add("Authorization",httpBasic);
 
         //定义body
@@ -88,6 +95,8 @@ public class AuthService {
                 bodyMap.get("access_token") == null ||
                 bodyMap.get("refresh_token") == null ||
                 bodyMap.get("jti") == null){
+            //处理出错的返回信息
+            new ApplyTokenErrorProcess().process(bodyMap);
             return null;
         }
         AuthToken authToken = new AuthToken();
@@ -99,18 +108,44 @@ public class AuthService {
 
     }
 
+    private static String AUTH_TOKEN_REDIS_PREFIX = "user_token:";
     public AuthToken login(String username, String password, String clientId, String clientSecret) {
         AuthToken authToken = applyToken(username, password, clientId, clientSecret);
         if(authToken == null){
             ExceptionCast.cast(CommonCode.FAIL);
         }
         //对 token 保存到 redis  (保存长jwt)
-        String key = "user_token:"+authToken.getAccess_token();
+        String key = AUTH_TOKEN_REDIS_PREFIX+authToken.getAccess_token();
         try {
             stringRedisTemplate.boundValueOps(key).set(JSONObject.toJSONString(authToken),tokenValiditySeconds, TimeUnit.SECONDS);
         }catch (Exception e){
             ExceptionCast.cast(AuthCode.AUTH_LOGIN_ERROR);
         }
         return authToken;
+    }
+
+    public String getJwtFromRedisByAccessToken(String accessToken) {
+        try {
+            String s = stringRedisTemplate.boundValueOps(AUTH_TOKEN_REDIS_PREFIX+accessToken).get();
+            AuthToken authToken = JSONObject.parseObject(s, AuthToken.class);
+            return authToken.getJwt_token();
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+    @Value("${auth.cookieDomain}")
+    String cookieDomain;
+    public void logout(String accessToken) {
+        //删除redis token
+        try {
+            stringRedisTemplate.delete(AUTH_TOKEN_REDIS_PREFIX+accessToken);
+            //清除cookie
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            CookieUtil.addCookie(attributes.getResponse(),cookieDomain,"/","uid","",0,false);
+        }catch (Exception e){
+            e.printStackTrace();
+            ExceptionCast.cast(AuthCode.AUTH_LOGIN_ERROR);
+        }
     }
 }

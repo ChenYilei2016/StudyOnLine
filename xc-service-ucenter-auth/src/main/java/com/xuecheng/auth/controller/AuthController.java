@@ -4,22 +4,20 @@ import com.xuecheng.api.auth.AuthControllerApi;
 import com.xuecheng.auth.service.AuthService;
 import com.xuecheng.framework.domain.ucenter.ext.AuthToken;
 import com.xuecheng.framework.domain.ucenter.request.LoginRequest;
-import com.xuecheng.framework.domain.ucenter.response.AuthCode;
+import com.xuecheng.framework.domain.ucenter.response.JwtResult;
 import com.xuecheng.framework.domain.ucenter.response.LoginResult;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.framework.utils.CookieUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.web.context.HttpRequestResponseHolder;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -65,7 +63,28 @@ public class AuthController implements AuthControllerApi {
 
 
     @Override
-    public ResponseResult logout() {
-        return null;
+    @PostMapping("/userlogout")
+    public ResponseResult logout(@CookieValue(value = "uid",required = false) String accessToken) {
+        authService.logout(accessToken);
+        return new ResponseResult(CommonCode.SUCCESS);
+    }
+
+    /**
+     *  获得jwt长令牌
+     * @return
+     */
+    @Override
+    @GetMapping("/userjwt")
+    public JwtResult userjwt(@CookieValue(value = "uid",required = false) String accessToken) {
+        if(null == accessToken){
+            return new JwtResult(CommonCode.FAIL,null);
+        }
+        //从redis中获得jwt长令牌
+        String jwtToken = authService.getJwtFromRedisByAccessToken(accessToken);
+        if(jwtToken != null){
+            return new JwtResult(CommonCode.SUCCESS,jwtToken);
+        }
+
+        return new JwtResult(CommonCode.FAIL,null);
     }
 }

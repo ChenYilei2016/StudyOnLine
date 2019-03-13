@@ -1,7 +1,9 @@
 package com.xuecheng.auth;
 
+import cn.hutool.crypto.digest.BCrypt;
 import com.alibaba.fastjson.JSON;
 import com.xuecheng.framework.client.XcServiceList;
+import com.xuecheng.framework.utils.BCryptUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaSigner;
@@ -27,11 +30,10 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -49,8 +51,8 @@ import static org.junit.Assert.*;
  * @date 2019/03/10- 17:04
  */
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
+//@SpringBootTest
+//@RunWith(SpringRunner.class)
 public class UcenterAuthApplicationTest {
 
     @Test
@@ -156,6 +158,11 @@ public class UcenterAuthApplicationTest {
         //将串进行base64编码
         byte[] encode = Base64Utils.encode(string.getBytes());
         return "Basic "+new String(encode);
+    }
+
+    public static void main(String[] args) {
+
+
     }
 
 }
