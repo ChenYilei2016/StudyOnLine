@@ -34,6 +34,7 @@ public class UcenterService {
         if(companyUser != null){
             xcUserExt.setCompanyId(companyUser.getCompanyId());
         }
+        //这个用户的权限列表
 
         return xcUserExt;
     }

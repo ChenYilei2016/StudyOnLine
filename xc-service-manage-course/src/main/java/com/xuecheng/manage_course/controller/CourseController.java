@@ -17,6 +17,7 @@ import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.manage_course.service.CourseService;
 import com.xuecheng.manage_course.service.TeachplanService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -54,7 +55,9 @@ public class CourseController implements CourseControllerApi {
     }
 
     //得到课程列表
+    //框架拦截 无权限 ×
     @Override
+    @PreAuthorize("hasAuthority('course_find_list')")
     @GetMapping("/coursebase/list/{page}/{size}")
     public QueryResponseResult getCourseAll(@PathVariable("page")int page,
                                             @PathVariable("size") int size,
@@ -62,9 +65,22 @@ public class CourseController implements CourseControllerApi {
         List<CourseInfo> result = courseService.getCourseAll(page,size,courseListRequest);
         return new QueryResponseResult(CommonCode.SUCCESS,result,0);
     }
-
+    //框架不拦截 有权限 √
     @Override
-    @GetMapping("/category/list")
+    @GetMapping("/coursepic/list/{courseId}")//course_find_pic
+    @PreAuthorize("hasAuthority('course_find_pic')")
+    public CoursePic queryCoursePic(@PathVariable("courseId") String courseId) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        Cookie cookie = new Cookie("123", "456");
+        cookie.setMaxAge(100);
+        attributes.getResponse().addCookie(cookie);
+        return courseService.queryCoursePic(courseId);
+    }
+
+    // 不解除框架的拦截 但有权限 √
+    @Override
+    @GetMapping("/category/list")//course_get_baseinfo
+    @PreAuthorize("hasAuthority('course_get_baseinfo')")
     public CategoryNode getCategoryAll() {
         return courseService.getCategoryAll();
     }
@@ -83,15 +99,7 @@ public class CourseController implements CourseControllerApi {
         return courseService.addCoursePic(courseId,pic);
     }
 
-    @Override
-    @GetMapping("/coursepic/list/{courseId}")
-    public CoursePic queryCoursePic(@PathVariable("courseId") String courseId) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        Cookie cookie = new Cookie("123", "456");
-        cookie.setMaxAge(100);
-        attributes.getResponse().addCookie(cookie);
-        return courseService.queryCoursePic(courseId);
-    }
+
 
     @Override
     @DeleteMapping("/coursepic/delete")

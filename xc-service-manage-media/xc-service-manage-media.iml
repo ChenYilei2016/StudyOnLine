@@ -164,6 +164,8 @@
     <orderEntry type="library" name="Maven: io.github.openfeign:feign-slf4j:9.5.1" level="project" />
     <orderEntry type="library" name="Maven: io.github.openfeign:feign-hystrix:9.5.1" level="project" />
     <orderEntry type="library" name="Maven: io.github.openfeign:feign-java8:9.5.1" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-core:5.0.8.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-aop:5.0.9.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-web:2.0.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter:2.0.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:2.0.5.RELEASE" level="project" />
@@ -180,7 +182,6 @@
     <orderEntry type="library" name="Maven: org.hibernate.validator:hibernate-validator:6.0.12.Final" level="project" />
     <orderEntry type="library" name="Maven: javax.validation:validation-api:2.0.1.Final" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-webmvc:5.0.9.RELEASE" level="project" />
-    <orderEntry type="library" name="Maven: org.springframework:spring-aop:5.0.9.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-data-mongodb:2.0.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.mongodb:mongodb-driver:3.6.4" level="project" />
     <orderEntry type="library" name="Maven: org.mongodb:bson:3.6.4" level="project" />

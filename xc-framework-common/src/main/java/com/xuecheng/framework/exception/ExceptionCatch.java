@@ -4,6 +4,7 @@ import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -33,6 +34,8 @@ public class ExceptionCatch {
         //可采用map收集
         if(e instanceof HttpMessageNotReadableException){
             return new ResponseResult(CommonCode.INVALID_PARAM);
+        }else if(e instanceof AccessDeniedException){
+            return new ResponseResult(CommonCode.UNAUTHORISE);
         }
         return new ResponseResult(false,99999,e.getMessage());
     }
