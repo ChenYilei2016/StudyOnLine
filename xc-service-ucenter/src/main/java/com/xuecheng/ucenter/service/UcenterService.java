@@ -1,13 +1,17 @@
 package com.xuecheng.ucenter.service;
 
 import com.xuecheng.framework.domain.ucenter.XcCompanyUser;
+import com.xuecheng.framework.domain.ucenter.XcMenu;
 import com.xuecheng.framework.domain.ucenter.XcUser;
 import com.xuecheng.framework.domain.ucenter.ext.XcUserExt;
+import com.xuecheng.ucenter.mysqldao.PermissionMapper;
 import com.xuecheng.ucenter.mysqldao.XcCompanyUserRepository;
 import com.xuecheng.ucenter.mysqldao.XcUserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * --添加相关注释--
@@ -22,6 +26,8 @@ public class UcenterService {
     XcUserRepository xcUserRepository;
     @Autowired
     XcCompanyUserRepository xcCompanyUserRepository;
+    @Autowired
+    PermissionMapper permissionMapper;
 
     public XcUserExt getUserExt(String username){
         XcUserExt xcUserExt = new XcUserExt();
@@ -35,7 +41,8 @@ public class UcenterService {
             xcUserExt.setCompanyId(companyUser.getCompanyId());
         }
         //这个用户的权限列表
-
+        List<XcMenu> xcMenuListByUserId = permissionMapper.findXcMenuListByUserId(xcUserExt.getId());
+        xcUserExt.setPermissions(xcMenuListByUserId);
         return xcUserExt;
     }
 }

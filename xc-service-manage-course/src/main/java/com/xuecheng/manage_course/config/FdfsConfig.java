@@ -7,7 +7,19 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jmx.support.RegistrationPolicy;
 
 /**
- * --添加相关注释--
+ *  fastdfs引入
+ *
+ *         <dependency>
+ *             <groupId>com.github.tobato</groupId>
+ *             <artifactId>fastdfs-client</artifactId>
+ *             <version>1.26.2</version>
+ *         </dependency>
+ *
+ * fdfs:
+ *   connect-timeout: 2000
+ *   tracker-list:
+ *     - 132.232.117.84:22122
+ *   so-timeout: 1500
  *
  * @author chenyilei
  * @date 2019/02/24- 14:37

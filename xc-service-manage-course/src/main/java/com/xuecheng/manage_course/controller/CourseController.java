@@ -18,12 +18,16 @@ import com.xuecheng.manage_course.service.CourseService;
 import com.xuecheng.manage_course.service.TeachplanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * --添加相关注释--
@@ -40,6 +44,7 @@ public class CourseController implements CourseControllerApi {
     @Autowired
     CourseService courseService;
 
+
     //组合列表
     @Override
     @GetMapping("/teachplan/list/{courseId}")
@@ -54,6 +59,27 @@ public class CourseController implements CourseControllerApi {
         return new ResponseResult(CommonCode.SUCCESS);
     }
 
+    /**
+     * 要得到自己的Id
+     * @return
+     */
+    @Override
+//    @PreAuthorize("hasAuthority('course_find_list')")
+    @GetMapping("/coursebase/list")
+    public QueryResponseResult getCourseByCompanyId() {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Map<String,String> principal=(Map<String,String>)authentication.getPrincipal();//一个map
+//        //是在下输了 日
+//        XcOauth2Util xcOauth2Util = new XcOauth2Util();
+//        XcOauth2Util.UserJwt userJwtFromHeader = xcOauth2Util.getUserJwtFromHeader(request);
+
+        List<CourseInfo> result = courseService.findCourseByCompanyId(principal.get("companyId"));
+
+        return new QueryResponseResult(CommonCode.SUCCESS,result,0);
+    }
+
     //得到课程列表
     //框架拦截 无权限 ×
     @Override
@@ -65,6 +91,8 @@ public class CourseController implements CourseControllerApi {
         List<CourseInfo> result = courseService.getCourseAll(page,size,courseListRequest);
         return new QueryResponseResult(CommonCode.SUCCESS,result,0);
     }
+
+
     //框架不拦截 有权限 √
     @Override
     @GetMapping("/coursepic/list/{courseId}")//course_find_pic

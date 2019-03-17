@@ -2,16 +2,19 @@ package com.xuecheng.manage_course.controller;
 
 import com.github.tobato.fastdfs.proto.storage.DownloadCallback;
 import com.github.tobato.fastdfs.service.FastFileStorageClient;
+import com.xuecheng.framework.domain.cms.CmsPage;
+import com.xuecheng.framework.domain.course.ext.CategoryNode;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.CommonCode;
+import com.xuecheng.manage_course.client.CmsPageClient;
 import io.swagger.annotations.Api;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -54,5 +57,16 @@ public class PicController{
                 return null;
             }
         });
+    }
+    @Autowired
+    CmsPageClient cmsPageClient;
+    @Autowired
+    RestTemplate restTemplate;
+
+    @RequestMapping("/testFeign")
+    @ResponseBody
+    public Object testFeign(){
+        ResponseEntity<CategoryNode> forEntity = restTemplate.getForEntity("http://127.0.0.1:31200/course/category/list", CategoryNode.class);
+        return forEntity.getBody();
     }
 }

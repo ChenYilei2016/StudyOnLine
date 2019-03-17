@@ -2,6 +2,7 @@ package com.xuecheng.manage_course.service;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.ext.CmsPostPageResult;
@@ -296,5 +297,9 @@ public class CourseService {
 
         teachplanMediaRepository.save(teachplanMedia);
         return new ResponseResult(CommonCode.SUCCESS);
+    }
+
+    public List<CourseInfo> findCourseByCompanyId(String companyId) {
+        return courseMapper.findCourseInfoByCompanyId(companyId);
     }
 }

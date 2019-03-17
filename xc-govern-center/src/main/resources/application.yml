@@ -3,6 +3,7 @@ server:
 spring:
   application:
     name: xc-govern-center #指定服务名
+
 eureka:
   client:
     register-with-eureka: false

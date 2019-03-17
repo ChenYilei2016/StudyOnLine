@@ -99,6 +99,7 @@ public class AuthService {
             new ApplyTokenErrorProcess().process(bodyMap);
             return null;
         }
+        System.err.println(bodyMap);
         AuthToken authToken = new AuthToken();
         authToken.setAccess_token((String) bodyMap.get("jti"));//用户身份令牌
         authToken.setRefresh_token((String) bodyMap.get("refresh_token"));//刷新令牌
