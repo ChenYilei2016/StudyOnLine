@@ -1,0 +1,27 @@
+server:
+  port: 31450
+spring:
+  application:
+    name: xc-service-manage-media-processor
+  data:
+    mongodb:
+      uri:  mongodb://root:root@localhost:27017
+      database: xc_media
+#rabbitmq配置
+  rabbitmq:
+    host: 132.232.117.84
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    listener:
+      simple:
+        max-concurrency: 10
+        concurrency: 10
+
+xc-service-manage-media:
+  mq:
+    queue-media-video-processor: queue_media_video_processor
+    routingkey-media-video: routingkey_media_video
+  video-location: F:/Xu2/学成在线/upload/
+  ffmpeg-path: ffmpeg
